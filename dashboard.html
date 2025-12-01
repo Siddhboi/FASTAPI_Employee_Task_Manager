@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager Dashboard</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            color: white;
+        }
+        
+        .login-header h1 {
+            font-size: 28px;
+            color: #1a202c;
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .demo-credentials {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #4a5568;
+        }
+        
+        .demo-credentials strong {
+            color: #2d3748;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .alert-error {
+            background: #fed7d7;
+            color: #c53030;
+            border-left: 4px solid #c53030;
+        }
+        
+        .alert-success {
+            background: #c6f6d5;
+            color: #2f855a;
+            border-left: 4px solid #2f855a;
+        }
+        
+        /* Dashboard Styles */
+        .dashboard {
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .navbar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .navbar-brand i {
+            font-size: 32px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .navbar-brand h1 {
+            font-size: 24px;
+            color: #1a202c;
+        }
+        
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .user-info {
+            text-align: right;
+        }
+        
+        .user-info .name {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .user-info .role {
+            font-size: 12px;
+            color: #718096;
+            text-transform: uppercase;
+        }
+        
+        .btn-logout {
+            padding: 10px 20px;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: #c53030;
+            transform: translateY(-2px);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .stat-icon.blue {
+            background: #e6f2ff;
+            color: #3182ce;
+        }
+        
+        .stat-icon.purple {
+            background: #f3e8ff;
+            color: #805ad5;
+        }
+        
+        .stat-icon.green {
+            background: #e6ffed;
+            color: #38a169;
+        }
+        
+        .stat-icon.yellow {
+            background: #fff8dc;
+            color: #d69e2e;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1a202c;
+        }
+        
+        .stat-label {
+            color: #718096;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            background: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #718096;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .tab:hover {
+            background: #f7fafc;
+        }
+        
+        .tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .content-header h2 {
+            font-size: 22px;
+            color: #1a202c;
+        }
+        
+        .btn-add {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+        
+        .card-text {
+            color: #4a5568;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .badge.pending {
+            background: #feebc8;
+            color: #c05621;
+        }
+        
+        .badge.in_progress {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+        
+        .badge.completed {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .btn-primary-sm {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary-sm:hover {
+            background: #5568d3;
+        }
+        
+        .btn-danger-sm {
+            background: #fc8181;
+            color: white;
+        }
+        
+        .btn-danger-sm:hover {
+            background: #f56565;
+        }
+        
+        .btn-success-sm {
+            background: #68d391;
+            color: white;
+        }
+        
+        .btn-success-sm:hover {
+            background: #48bb78;
+        }
+        
+        .form-grid {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+        
+        .loading i {
+            font-size: 48px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+        
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .empty-state p {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+    const { useState, useEffect } = React;
+    const API_URL = 'http://localhost:8000';
+    const API_KEY = 'your-secret-api-key-12345';  // from your .env/API_KEY  // ← use a real key defined in your backend
+
+    function App() {
+        const [isLoggedIn, setIsLoggedIn] = useState(false);
+        const [token, setToken] = useState(localStorage.getItem('token') || '');
+        const [user, setUser] = useState(null);
+        const [activeTab, setActiveTab] = useState('overview');
+        const [employees, setEmployees] = useState([]);
+        const [tasks, setTasks] = useState([]);
+        const [loading, setLoading] = useState(false);
+        const [error, setError] = useState('');
+        const [success, setSuccess] = useState('');
+
+        // API Helper
+        const callAPI = async (endpoint, method = 'GET', body = null) => {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                         'X-API-Key': API_KEY,  // ← ADD THIS
+                    }
+                };
+                if (body) options.body = JSON.stringify(body);
+
+                const response = await fetch(`${API_URL}${endpoint}`, options);
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(text || response.statusText);
+                }
+                if (method === 'DELETE') return true;
+                return await response.json();
+            } catch (err) {
+                console.error('API Error:', err);
+                throw err;
+            }
+        };
+
+        // Load data
+        const loadData = async () => {
+            if (!token) return;
+            setLoading(true);
+            setError('');
+            try {
+                const [userData, empData, taskData] = await Promise.all([
+                    callAPI('/auth/me'),
+                    callAPI('/employees/'),
+                    callAPI('/tasks/')
+                ]);
+                setUser(userData);
+                setEmployees(empData.items || empData);
+                setTasks(taskData.items || taskData);
+                setIsLoggedIn(true);
+            } catch (err) {
+                console.error(err);
+                setError('Failed to load data. Please log in again.');
+                handleLogout(false);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        useEffect(() => {
+            if (token) {
+                loadData();
+            }
+        }, [token]);
+
+        // Login
+        const handleLogin = async (e) => {
+            e.preventDefault();
+            setError('');
+            setSuccess('');
+            const formData = new FormData(e.target);
+            const credentials = {
+                username: formData.get('username'),
+                password: formData.get('password')
+            };
+
+            setLoading(true);
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(credentials)
+                });
+
+                if (!response.ok) throw new Error('Invalid credentials');
+
+                const data = await response.json();
+                setToken(data.access_token);
+                localStorage.setItem('token', data.access_token);
+                setSuccess('Login successful!');
+                setTimeout(() => setSuccess(''), 3000);
+            } catch (err) {
+                console.error(err);
+                setError('Invalid username or password');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        // Logout
+        const handleLogout = (clearMessages = true) => {
+            setToken('');
+            setIsLoggedIn(false);
+            setUser(null);
+            localStorage.removeItem('token');
+            setActiveTab('overview');
+            if (clearMessages) {
+                setError('');
+                setSuccess('');
+            }
+        };
+
+        // Add Employee
+        const handleAddEmployee = async (e) => {
+            e.preventDefault();
+            setError('');
+            setSuccess('');
+            const formData = new FormData(e.target);
+            const employee = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                role: formData.get('role')
+            };
+
+            try {
+                await callAPI('/employees/', 'POST', employee);
+                setSuccess('Employee added successfully!');
+                e.target.reset();
+                const data = await callAPI('/employees/');
+                setEmployees(data.items || data);
+                setTimeout(() => setSuccess(''), 3000);
+            } catch (err) {
+                console.error(err);
+                setError('Failed to add employee');
+                setTimeout(() => setError(''), 3000);
+            }
+        };
+
+        // Delete Employee
+        const handleDeleteEmployee = async (id) => {
+            if (!confirm('Are you sure you want to delete this employee?')) return;
+            setError('');
+            setSuccess('');
+            try {
+                await callAPI(`/employees/${id}`, 'DELETE');
+                setEmployees(employees.filter(e => e.id !== id));
+                setSuccess('Employee deleted successfully!');
+                setTimeout(() => setSuccess(''), 3000);
+            } catch (err) {
+                console.error(err);
+                setError('Failed to delete employee');
+                setTimeout(() => setError(''), 3000);
+            }
+        };
+
+        // Add Task
+        const handleAddTask = async (e) => {
+            e.preventDefault();
+            setError('');
+            setSuccess('');
+            const formData = new FormData(e.target);
+            const task = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                status: formData.get('status'),
+                employee_id: formData.get('employee_id')
+                    ? parseInt(formData.get('employee_id'))
+                    : null
+            };
+
+            try {
+                await callAPI('/tasks/', 'POST', task);
+                setSuccess('Task added successfully!');
+                e.target.reset();
+                const data = await callAPI('/tasks/');
+                setTasks(data.items || data);
+                setTimeout(() => setSuccess(''), 3000);
+            } catch (err) {
+                console.error(err);
+                setError('Failed to add task');
+                setTimeout(() => setError(''), 3000);
+            }
+        };
+
+        // Update Task Status
+        const handleUpdateTaskStatus = async (taskId, newStatus) => {
+            setError('');
+            setSuccess('');
+            try {
+                await callAPI(`/tasks/${taskId}`, 'PUT', { status: newStatus });
+                const data = await callAPI('/tasks/');
+                setTasks(data.items || data);
+                setSuccess('Task status updated!');
+                setTimeout(() => setSuccess(''), 3000);
+            } catch (err) {
+                console.error(err);
+                setError('Failed to update task');
+                setTimeout(() => setError(''), 3000);
+            }
+        };
+
+        // Delete Task
+        const handleDeleteTask = async (id) => {
+            if (!confirm('Are you sure you want to delete this task?')) return;
+            setError('');
+            setSuccess('');
+            try {
+                await callAPI(`/tasks/${id}`, 'DELETE');
+                setTasks(tasks.filter(t => t.id !== id));
+                setSuccess('Task deleted successfully!');
+                setTimeout(() => setSuccess(''), 3000);
+            } catch (err) {
+                console.error(err);
+                setError('Failed to delete task');
+                setTimeout(() => setError(''), 3000);
+            }
+        };
+
+        // Statistics
+        const stats = {
+            totalEmployees: employees.length,
+            totalTasks: tasks.length,
+            pendingTasks: tasks.filter(t => t.status === 'pending').length,
+            completedTasks: tasks.filter(t => t.status === 'completed').length
+        };
+        // Recent items (newest first by id)
+        const recentEmployees = [...employees]
+            .sort((a, b) => b.id - a.id)  // larger id = newer
+            .slice(0, 3);
+
+        const recentTasks = [...tasks]
+            .sort((a, b) => b.id - a.id)
+            .slice(0, 3);
+
+        // LOGIN VIEW
+        if (!isLoggedIn) {
+            return (
+                <div className="login-container">
+                    <div className="login-card">
+                        <div className="login-header">
+                            <div className="login-icon">
+                                <i className="fas fa-tasks"></i>
+                            </div>
+                            <h1>Welcome Back</h1>
+                            <p>Sign in to manage your employees and tasks</p>
+                        </div>
+
+                        {error && <div className="alert alert-error">{error}</div>}
+                        {success && <div className="alert alert-success">{success}</div>}
+
+                        <form onSubmit={handleLogin}>
+                            <div className="form-group">
+                                <label>Username</label>
+                                <input
+                                    type="text"
+                                    name="username"
+                                    placeholder="Enter your username"
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Password</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    placeholder="Enter your password"
+                                    required
+                                />
+                            </div>
+                            <button type="submit" className="btn-primary" disabled={loading}>
+                                {loading ? 'Signing in...' : 'Sign In'}
+                            </button>
+                        </form>
+
+                        <div className="demo-credentials">
+                            <strong>Demo Credentials:</strong><br/>
+                            Admin: <code>admin / admin123</code><br/>
+                            Client: <code>client / client123</code>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // LOADING STATE AFTER LOGIN
+        if (loading && !user) {
+            return (
+                <div className="loading" style={{ color: 'white', textAlign: 'center', paddingTop: '100px' }}>
+                    <i className="fas fa-spinner"></i>
+                    <p>Loading dashboard...</p>
+                </div>
+            );
+        }
+
+        // DASHBOARD VIEW
+        return (
+            <div className="dashboard">
+                <div className="navbar">
+                    <div className="navbar-brand">
+                        <i className="fas fa-tasks"></i>
+                        <h1>Task Manager</h1>
+                    </div>
+                    <div className="navbar-user">
+                        <div className="user-info">
+                            <div className="name">{user?.full_name || user?.username}</div>
+                            <div className="role">{user?.role}</div>
+                        </div>
+                        <button className="btn-logout" onClick={handleLogout}>
+                            <i className="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+
+                {error && <div className="alert alert-error">{error}</div>}
+                {success && <div className="alert alert-success">{success}</div>}
+
+                <div className="stats-grid">
+                    <div className="stat-card">
+                        <div className="stat-card-header">
+                            <div>
+                                <div className="stat-value">{stats.totalEmployees}</div>
+                                <div className="stat-label">Total Employees</div>
+                            </div>
+                            <div className="stat-icon blue">
+                                <i className="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="stat-card">
+                        <div className="stat-card-header">
+                            <div>
+                                <div className="stat-value">{stats.totalTasks}</div>
+                                <div className="stat-label">Total Tasks</div>
+                            </div>
+                            <div className="stat-icon purple">
+                                <i className="fas fa-clipboard-list"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="stat-card">
+                        <div className="stat-card-header">
+                            <div>
+                                <div className="stat-value">{stats.pendingTasks}</div>
+                                <div className="stat-label">Pending Tasks</div>
+                            </div>
+                            <div className="stat-icon yellow">
+                                <i className="fas fa-clock"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="stat-card">
+                        <div className="stat-card-header">
+                            <div>
+                                <div className="stat-value">{stats.completedTasks}</div>
+                                <div className="stat-label">Completed Tasks</div>
+                            </div>
+                            <div className="stat-icon green">
+                                <i className="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tabs */}
+                <div className="tabs">
+                    <button
+                        className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('overview')}
+                    >
+                        Overview
+                    </button>
+                    <button
+                        className={`tab ${activeTab === 'employees' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('employees')}
+                    >
+                        Employees
+                    </button>
+                    <button
+                        className={`tab ${activeTab === 'tasks' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('tasks')}
+                    >
+                        Tasks
+                    </button>
+                    <button
+                        className={`tab ${activeTab === 'add' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('add')}
+                    >
+                        Add New
+                    </button>
+                </div>
+
+                 {/* Content */}
+                <div className="content-card">
+                    {/* Overview Tab */}
+                    {activeTab === 'overview' && (
+                        <div>
+                            <div className="content-header">
+                                <h2>Overview</h2>
+                            </div>
+                            {tasks.length === 0 && employees.length === 0 ? (
+                                <div className="empty-state">
+                                    <i className="fas fa-box-open"></i>
+                                    <p>No data yet. Start by adding employees and tasks!</p>
+                                </div>
+                            ) : (
+                                <div className="grid">
+                                    <div className="card">
+                                        <div className="card-header">
+                                            <div>
+                                                <div className="card-title">Recent Employees</div>
+                                                <p className="card-text">
+                                                    Latest team members in the system.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {recentEmployees.map(emp => (
+                                            <div key={emp.id} style={{ marginTop: '10px' }}>
+                                                <strong>{emp.name}</strong> - {emp.role}
+                                                <div style={{ fontSize: '12px', color: '#718096' }}>
+                                                    {emp.email}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {employees.length === 0 && (
+                                            <p style={{ color: '#718096' }}>No employees yet.</p>
+                                        )}
+                                    </div>
+                                    <div className="card">
+                                        <div className="card-header">
+                                            <div>
+                                                <div className="card-title">Recent Tasks</div>
+                                                <p className="card-text">
+                                                    Latest tasks created in the system.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {recentTasks.map(task => (
+                                            <div key={task.id} style={{ marginTop: '10px' }}>
+                                                <strong>{task.title}</strong>
+                                                <div style={{ fontSize: '12px', color: '#718096' }}>
+                                                    {task.description}
+                                                </div>
+                                                <span className={`badge ${task.status}`} style={{ marginTop: '5px' }}>
+                                                    {task.status.replace('_', ' ')}
+                                                </span>
+                                            </div>
+                                        ))}
+                                        {tasks.length === 0 && (
+                                            <p style={{ color: '#718096' }}>No tasks yet.</p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'employees' && (
+                        <div>
+                            <div className="content-header">
+                                <h2>Employees</h2>
+                            </div>
+                            {employees.length === 0 ? (
+                                <div className="empty-state">
+                                    <i className="fas fa-user-slash"></i>
+                                    <p>No employees found. Add some in "Add New" tab.</p>
+                                </div>
+                            ) : (
+                                <div className="grid">
+                                    {employees.map(emp => (
+                                        <div key={emp.id} className="card">
+                                            <div className="card-header">
+                                                <div>
+                                                    <div className="card-title">{emp.name}</div>
+                                                    <p className="card-text">
+                                                        {emp.role}<br />
+                                                        <span style={{ fontSize: '12px', color: '#718096' }}>{emp.email}</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            {user?.role === 'admin' && (
+                                                <div className="btn-group">
+                                                    <button
+                                                        className="btn btn-danger-sm"
+                                                        onClick={() => handleDeleteEmployee(emp.id)}
+                                                    >
+                                                        <i className="fas fa-trash"></i> Delete
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'tasks' && (
+                        <div>
+                            <div className="content-header">
+                                <h2>Tasks</h2>
+                            </div>
+                            {tasks.length === 0 ? (
+                                <div className="empty-state">
+                                    <i className="fas fa-tasks"></i>
+                                    <p>No tasks found. Add some in "Add New" tab.</p>
+                                </div>
+                            ) : (
+                                <div className="grid">
+                                    {tasks.map(task => {
+                                        const assignedEmp = employees.find(e => e.id === task.employee_id);
+                                        return (
+                                            <div key={task.id} className="card">
+                                                <div className="card-header">
+                                                    <div>
+                                                        <div className="card-title">{task.title}</div>
+                                                        <p className="card-text">{task.description}</p>
+                                                        {assignedEmp && (
+                                                            <p className="card-text" style={{ marginTop: '8px', fontSize: '13px' }}>
+                                                                <strong>Assigned to:</strong> {assignedEmp.name}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <span className={`badge ${task.status}`}>
+                                                    {task.status.replace('_', ' ')}
+                                                </span>
+                                                <div className="btn-group">
+                                                    {task.status !== 'pending' && (
+                                                        <button
+                                                            className="btn btn-primary-sm btn-sm"
+                                                            onClick={() => handleUpdateTaskStatus(task.id, 'pending')}
+                                                        >
+                                                            Pending
+                                                        </button>
+                                                    )}
+                                                    {task.status !== 'in_progress' && (
+                                                        <button
+                                                            className="btn btn-primary-sm btn-sm"
+                                                            onClick={() => handleUpdateTaskStatus(task.id, 'in_progress')}
+                                                        >
+                                                            In Progress
+                                                        </button>
+                                                    )}
+                                                    {task.status !== 'completed' && (
+                                                        <button
+                                                            className="btn btn-success-sm btn-sm"
+                                                            onClick={() => handleUpdateTaskStatus(task.id, 'completed')}
+                                                        >
+                                                            Complete
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        className="btn btn-danger-sm btn-sm"
+                                                        onClick={() => handleDeleteTask(task.id)}
+                                                    >
+                                                        <i className="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'add' && (
+                        <div>
+                            <div className="content-header">
+                                <h2>Add New Records</h2>
+                            </div>
+                            <div className="form-grid">
+                                <div className="card">
+                                    <h3 className="card-title">Add Employee</h3>
+                                    <p className="card-text" style={{ marginBottom: '15px' }}>
+                                        Create a new employee record in the system.
+                                    </p>
+                                    <form onSubmit={handleAddEmployee}>
+                                        <div className="form-group">
+                                            <label>Full Name</label>
+                                            <input name="name" placeholder="Enter full name" required />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Email</label>
+                                            <input name="email" type="email" placeholder="Enter email" required />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Role</label>
+                                            <input name="role" placeholder="Enter role (e.g., Developer)" required />
+                                        </div>
+                                        <button type="submit" className="btn-primary">
+                                            Add Employee
+                                        </button>
+                                    </form>
+                                </div>
+                                <div className="card">
+                                    <h3 className="card-title">Add Task</h3>
+                                    <p className="card-text" style={{ marginBottom: '15px' }}>
+                                        Create a new task and optionally assign it to an employee.
+                                    </p>
+                                    <form onSubmit={handleAddTask}>
+                                        <div className="form-group">
+                                            <label>Title</label>
+                                            <input name="title" placeholder="Enter task title" required />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Description</label>
+                                            <input name="description" placeholder="Enter task description" required />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Status</label>
+                                            <select name="status">
+                                                <option value="pending">Pending</option>
+                                                <option value="in_progress">In Progress</option>
+                                                <option value="completed">Completed</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Assign To</label>
+                                            <select name="employee_id">
+                                                <option value="">No Assignment</option>
+                                                {employees.map(e => (
+                                                    <option key={e.id} value={e.id}>
+                                                        {e.name} ({e.role})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <button type="submit" className="btn-primary">
+                                            Add Task
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+</script>

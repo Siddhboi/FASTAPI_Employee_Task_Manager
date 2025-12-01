@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: employee_task_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: employee_task_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d employee_task_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app-network
+
+  # FastAPI Application
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: employee_task_api
+    restart: unless-stopped
+    command: >
+      sh -c "
+        echo 'Waiting for PostgreSQL to be ready...' &&
+        while ! pg_isready -h postgres -U postgres; do
+          echo 'Waiting for postgres...'
+          sleep 2
+        done &&
+        echo 'PostgreSQL is ready!' &&
+        echo 'Creating database tables...' &&
+        python -c 'from database import Base, engine; Base.metadata.create_all(bind=engine)' &&
+        echo 'Creating default users...' &&
+        python create_default_users.py &&
+        echo 'Creating sample data...' &&
+        python sample_data.py &&
+        echo 'Starting API server...' &&
+        uvicorn main:app --host 0.0.0.0 --port 8000
+      "
+    environment:
+      # Database Configuration
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/employee_task_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: employee_task_db
+      
+      # JWT Configuration
+      JWT_SECRET_KEY: your-super-secret-jwt-key-change-this-in-production
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRATION_MINUTES: 1440
+      
+      # API Configuration
+      API_KEY: your-secret-api-key-12345
+      APP_NAME: Employee Task Manager API
+      APP_VERSION: 2.0.0
+      DEBUG: "True"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
